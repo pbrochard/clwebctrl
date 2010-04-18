@@ -125,6 +125,7 @@
      \"http://www.w3.org/TR/html4/transitional.dtd\">
   <title>clwebctrl:login</title>
 </head>
+<p align='right'><a href='/'>Log Out</a></p>
 <p>~A</p>
 <body onLoad=\"document.login_form.login.focus()\">
   <form action=\"/\" method=\"post\" name=\"login_form\" enctype=\"application/x-www-form-urlencoded\">
@@ -162,6 +163,7 @@
   (declare (ignore host))
   (sh "camE -f -s")
   (send-file-http sock "/tmp/webcam.jpg" :only-head only-head))
+
 
 (defun send-ssh (action sock host content &optional only-head)
   (case action
