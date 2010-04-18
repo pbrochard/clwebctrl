@@ -7,8 +7,6 @@ open/close ports, system information, webcam snapshot...
 
 After installing (see INSTALL), start the clwebctrl server.
 
-DON'T FORGET TO CHANGE THE DEFAULT LOGIN/PASSWORD!
-
 $ your-lisp load.lisp
 
 and then you can control your machine with a web browser

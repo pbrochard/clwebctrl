@@ -1,7 +1,19 @@
-Before installing clsharedir, install a lisp implementation
-like clisp (http://clisp.cons.org) or cmucl (http://www.cons.org/cmucl/).
+Before installing clwebctrl, install a lisp implementation
+like clisp (http://clisp.cons.org), sbcl (http://www.sbcl.org/)  or
+cmucl (http://www.cons.org/cmucl/).
 
-First compile the source code:
+First, create a new configuration file with your login and password
+and modules you want to use for this machine:
+
+~/.clwebctrlrc
+----------------------------------------------------
+(defparameter *login* "your_login_name")
+(defparameter *password* "your_login_password")
+
+(add-module 'shutdown 'webcam ...)
+----------------------------------------------------
+
+Second compile the source code:
 
 $ your-lisp
 > (load "load.lisp")
@@ -10,17 +22,14 @@ or
 
 $ clisp load.lisp
 or
-$ cmucl --load load.lisp
+$ sbcl --load load.lisp
+or
+$ cmucl -load load.lisp
 or
 $ your-lisp <load-option> load.lisp
 
-
-Then you can put the clsharedir directory where you want and you can launch
-clsharedir with:
-
-$ your-lisp <load-option> /the/clsharedir/directory/load.lisp [options]
-
-Optionnaly you can create a shell or batch script to automate this process.
+And then you can control your machine with a web browser
+pointed at http://your_ip_address:clwebctrl_port.
 
 
 Have fun,
