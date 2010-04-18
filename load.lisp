@@ -1,14 +1,10 @@
 ;;; --------------------------------------------------------------------------
 ;;;
-;;; #Date#: Wed Mar 30 23:36:29 2005
-;;;
-;;; --------------------------------------------------------------------------
-;;;
-;;; (C) 2005 Philippe Brochard <hocwp@free.fr>
+;;; (C) 2010 Philippe Brochard <hocwp@free.fr>
 ;;;
 ;;; This program is free software; you can redistribute it and/or modify
 ;;; it under the terms of the GNU General Public License as published by
-;;; the Free Software Foundation; either version 2 of the License, or
+;;; the Free Software Foundation; either version 3 of the License, or
 ;;; (at your option) any later version.
 ;;;
 ;;; This program is distributed in the hope that it will be useful,
@@ -22,8 +18,6 @@
 ;;;
 ;;; --------------------------------------------------------------------------
 
-
-(pushnew :TEST *features*)
 
 #+SBCL (require :asdf)
 
@@ -40,6 +34,6 @@
 
 (asdf:oos 'asdf:load-op :clwebctrl)
 
-(clwebctrl:start-server 8080)
+(clwebctrl:start-server)
 
 (quit)

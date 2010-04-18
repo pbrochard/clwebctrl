@@ -1,14 +1,12 @@
 ;;;; -*- Mode: Lisp -*-
 ;;;; Author: Philippe Brochard <pbrochard@common-lisp.net>
 ;;;; ASDF System Definition
-;;;
-;;; #date#: Fri Mar 25 21:56:40 2005
 
 (in-package #:asdf)
 
 (defsystem clwebctrl
-  :description "Server: control a server from a web browser"
-  :version "1.0"
+  :description "Control a machine from a web browser"
+  :version "0.0"
   :author "Philippe Brochard  <pbrochard@common-lisp.net>"
   :licence "GNU General Public License (GPL)"
   :components ((:module :src
