@@ -126,16 +126,16 @@
   <title>clwebctrl:login</title>
 </head>
 <p align='right'><a href='/'>Log Out</a></p>
-<p>~A</p>
 <body onLoad=\"document.login_form.login.focus()\">
   <form action=\"/\" method=\"post\" name=\"login_form\" enctype=\"application/x-www-form-urlencoded\">
     <input type=\"hidden\" name=\"identified\" value=\"identified\">
+    <p>~A</p>
     <p> <a href='/logo.png'>logo</a> </p>
     <p> <img src='/logo.png'> </p>
     <p><input type='submit' name='webcam' value='webcam'></p>
     <p><input type='submit' name='ssh_enable' value='Enable SSH'>
        <input type='submit' name='ssh_disable' value='Disable SSH'></p>
-    <p><input type='submit' name='halt_server' value='Halt Server'></p>
+    <p><input type='submit' name='halt_server' value='Shutdown Server'></p>
     <p><input type='submit' name='refresh' value='refresh'></p>
     <p>~A</p>
   </form>
@@ -150,7 +150,8 @@
   (cond ((find-in-content "webcam" content) (send-webcam sock host only-head))
 	((find-in-content "ssh_enable" content) (send-ssh 'enabled sock host content only-head))
 	((find-in-content "ssh_disable" content) (send-ssh 'disabled sock host content only-head))
-	((find-in-content "halt_server" content) (send-halt-server sock host content only-head))
+	((find-in-content "halt_server" content) (send-halt-server-confirm sock host content only-head))
+	((find-in-content "halt_server_confirm" content) (send-halt-server sock host content only-head))
 	(t (send-standard-page sock host content only-head))))
 
 
@@ -171,6 +172,10 @@
     (disabled (print 'disabled)))
   (send-standard-page sock host content only-head (format nil "SSH ~A!" action)))
 
+
+(defun send-halt-server-confirm (sock host content &optional only-head)
+  (send-standard-page sock host content only-head "Really shutdown the server ?
+<input type='submit' name='halt_server_confirm' value='Yes'>"))
 
 (defun send-halt-server (sock host content &optional only-head)
   (send-standard-page sock host content only-head "Server Halted!")
