@@ -1,24 +1,18 @@
-Documentation for clsharedir:
+Documentation for clwebctrl:
 
-Sharedir is a little program to share directory with other host.
+clwebctrl is a progam to control a machine with a simple web
+interface.
+You can add (or remove) actions like shutdown, start/stop services,
+open/close ports, system information, webcam snapshot...
 
-After installing (see INSTALL), start clsharedir as server part
-in the directory you want to share:
+After installing (see INSTALL), start the clwebctrl server.
 
-$ your-lisp load.lisp --server
+DON'T FORGET TO CHANGE THE DEFAULT LOGIN/PASSWORD!
 
-and then others can see your directory vith a web browser (at
-http://your_adresse:clsharedir_port).
+$ your-lisp load.lisp
 
-They also can download/upload file to your directory with the
-client part of clsharedir.
-
-$ your-lisp load.lisp --content   =>  query content from a directory
-                                      server
-$ your-lisp load.lisp --copy      =>  copy content from server
-                                      directory in localhost directory
-$ your-lisp load.lisp --save      =>  save content from localhost
-                                      directory to server directory
+and then you can control your machine with a web browser
+at http://your_ip_address:clwebctrl_port.
 
 
 
