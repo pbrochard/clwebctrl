@@ -46,6 +46,8 @@
 (defparameter *password* "1234")
 (defparameter *port* 8080)
 
+(defparameter *config-file* (merge-pathnames (user-homedir-pathname) ".clwebctrlrc"))
+
 
 
 (defun only-head-p (type-request)
@@ -245,11 +247,24 @@
 
 
 (defun start-server (&optional (port *port*))
+  (when (probe-file *config-file*)
+    (load *config-file*))
   (let ((server-sock (net:open-socket-server port)))
     (fformat t "~&~%Start server on port ~A~%" port)
     (fformat t "~&~%You can watch the directory content with a web browser pointed to~%")
     (fformat t "   http://localhost:~A~%" port)
     (fformat t "or http://your_ip:~A~%" port)
+    (when (or (equal *login* "user") (equal *password* "password"))
+      (error "Error: You are using the default login and/or password.
+Please, change this settings in the clwebctrl configuration file:
+Add this lines in ~A:
+-----------------------------------------------
+(in-package :clwebctrl)
+
+(defparameter *login* \"your_login_name\")
+(defparameter *password* \"your_login_password\")
+-----------------------------------------------"
+*config-file*))
     (server-loop server-sock)))
 
 

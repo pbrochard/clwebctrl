@@ -7,6 +7,8 @@ and modules you want to use for this machine:
 
 ~/.clwebctrlrc
 ----------------------------------------------------
+(in-package :clwebctrl)
+
 (defparameter *login* "your_login_name")
 (defparameter *password* "your_login_password")
 
