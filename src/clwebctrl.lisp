@@ -63,8 +63,8 @@
 
 
 (defun check-if-identified (content)
-  (or (and (equal (find-in-content "login" content) *login*)
-	   (equal (find-in-content "password" content) *password*))
+  (or (and (equal (find-in-content "a1234" content) *login*)
+	   (equal (find-in-content "b1234" content) *password*))
       (equal (find-in-content "identified" content) "identified")))
 
 (defmacro with-check-identified ((content sock host only-head) &body body)
@@ -106,8 +106,8 @@
   <form action=\"/\" method=\"post\" name=\"login_form\" enctype=\"application/x-www-form-urlencoded\">
     <br><br>
     <center>
-      <p> Utilisateur : <input type=\"login\" name=\"login\" id=\"login\"> </p>
-      <p> Mot de passe : <input type=\"password\" name=\"password\"> </p>
+      <p> Utilisateur : <input type=\"login\" name=\"a1234\" id=\"login\"> </p>
+      <p> Mot de passe : <input type=\"password\" name=\"b1234\"> </p>
       <p> <input type=\"submit\" value=\"Envoyer\"> </p>
     </center>  </form>
 </body>
