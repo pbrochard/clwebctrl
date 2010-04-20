@@ -57,7 +57,7 @@
 
 (defun send-halt-server (sock host content &optional only-head)
   (send-standard-page sock host content only-head "Server Halted!")
-  #+:PROD (sh "sudo halt"))
+  #+PROD (sh "sudo halt"))
 
 
 (defmodule 'refresh
