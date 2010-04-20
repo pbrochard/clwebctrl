@@ -27,27 +27,8 @@
 ;;		   (space 1)))
 
 
-(in-package :common-lisp-user)
-
-(defpackage :clwebctrl
-  (:use :common-lisp
-	#+(or CLISP CMU) :ext
-	#+SBCL :sb-ext
-	:tools :my-http
-	:transfer-stream
-	:shell)
-  (:export :start-server))
-
 
 (in-package :clwebctrl)
-
-
-(defparameter *login* "user")
-(defparameter *password* "1234")
-(defparameter *port* 8080)
-
-(defparameter *config-file* (merge-pathnames (user-homedir-pathname) ".clwebctrlrc"))
-
 
 
 (defun only-head-p (type-request)
@@ -130,56 +111,32 @@
   <form action=\"/\" method=\"post\" name=\"login_form\" enctype=\"application/x-www-form-urlencoded\">
     <input type=\"hidden\" name=\"identified\" value=\"identified\">
     <p>~A</p>
+    ~A
+    <hr>
     <p> <a href='/logo.png'>logo</a> </p>
     <p> <img src='/logo.png'> </p>
-    <p><input type='submit' name='webcam' value='webcam'></p>
-    <p><input type='submit' name='ssh_enable' value='Enable SSH'>
-       <input type='submit' name='ssh_disable' value='Disable SSH'></p>
-    <p><input type='submit' name='halt_server' value='Shutdown Server'></p>
-    <p><input type='submit' name='refresh' value='refresh'></p>
     <p>~A</p>
   </form>
 </body>
 </html>"
 			 (if message message "")
+			 *module-string*
 			 (incf plop))
 		 only-head))))
 
 
 (defun send-main-page (sock host content &optional only-head)
-  (cond ((find-in-content "webcam" content) (send-webcam sock host only-head))
-	((find-in-content "ssh_enable" content) (send-ssh 'enabled sock host content only-head))
-	((find-in-content "ssh_disable" content) (send-ssh 'disabled sock host content only-head))
-	((find-in-content "halt_server" content) (send-halt-server-confirm sock host content only-head))
-	((find-in-content "halt_server_confirm" content) (send-halt-server sock host content only-head))
-	(t (send-standard-page sock host content only-head))))
+  (dolist (action *module-actions*)
+    (when (find-in-content (first action) content)
+      (funcall (second action) sock host content only-head)
+      (return-from send-main-page nil)))
+  (send-standard-page sock host content only-head))
 
 
 
 (defun send-logo (sock host &optional only-head)
   (declare (ignore host))
   (send-file-http sock "logo.png" :only-head only-head))
-
-(defun send-webcam (sock host &optional only-head)
-  (declare (ignore host))
-  (sh "camE -f -s")
-  (send-file-http sock "/tmp/webcam.jpg" :only-head only-head))
-
-
-(defun send-ssh (action sock host content &optional only-head)
-  (case action
-    (enabled (print 'enabled))
-    (disabled (print 'disabled)))
-  (send-standard-page sock host content only-head (format nil "SSH ~A!" action)))
-
-
-(defun send-halt-server-confirm (sock host content &optional only-head)
-  (send-standard-page sock host content only-head "Really shutdown the server ?
-<input type='submit' name='halt_server_confirm' value='Yes'>"))
-
-(defun send-halt-server (sock host content &optional only-head)
-  (send-standard-page sock host content only-head "Server Halted!")
-  (sh "sudo halt"))
 
 
 
