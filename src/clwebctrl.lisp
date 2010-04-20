@@ -115,12 +115,14 @@
     <hr>
     <p> <a href='/logo.png'>logo</a> </p>
     <p> <img src='/logo.png'> </p>
+    ~A
     <p>~A</p>
   </form>
 </body>
 </html>"
 			 (if message message "")
 			 *module-string*
+			 (if *in-production* "" "Test code")
 			 (incf hit))
 		 only-head))))
 

@@ -29,6 +29,7 @@
 
 (in-package :clwebctrl)
 
+(defparameter *in-production* nil)
 
 
 (defparameter *login* "user")
