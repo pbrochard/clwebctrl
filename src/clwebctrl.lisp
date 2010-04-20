@@ -96,7 +96,7 @@
 	     only-head))
 
 
-(let ((plop 0))
+(let ((hit 0))
   (defun send-standard-page (sock host content &optional only-head message)
     (with-check-identified (content sock host only-head)
       (send-http sock "text/html"
@@ -104,7 +104,7 @@
 <head>
   <!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"
      \"http://www.w3.org/TR/html4/transitional.dtd\">
-  <title>clwebctrl:login</title>
+  <title>clwebctrl</title>
 </head>
 <p align='right'><a href='/'>Log Out</a></p>
 <body onLoad=\"document.login_form.login.focus()\">
@@ -121,7 +121,7 @@
 </html>"
 			 (if message message "")
 			 *module-string*
-			 (incf plop))
+			 (incf hit))
 		 only-head))))
 
 
