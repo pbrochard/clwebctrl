@@ -1,3 +1,8 @@
+2010-04-25  Philippe Brochard  <pbrochard@common-lisp.net>
+
+	* src/clwebctrl.lisp (check-if-identified): Add a MD5 hash challenge
+	in main page.
+
 2010-04-24  Philippe Brochard  <pbrochard@common-lisp.net>
 
 	* clwebctrl.lisp (check-if-identified): Add a MD5 hash challenge

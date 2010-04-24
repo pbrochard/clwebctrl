@@ -31,6 +31,10 @@
 (in-package :clwebctrl)
 
 
+(defparameter *logged-key* nil)
+(defparameter *authorized-keys* nil)
+
+
 (defun only-head-p (type-request)
   (if (equal type-request :head) :head nil))
 
@@ -48,11 +52,14 @@
 	     (let ((to-check (find-in-content field content)))
 	       (when to-check
 		 (string= to-check (md5 (concatenate 'string original key)))))))
-    (let ((key (find-in-content "key" content)))
-      (or (and key
-	       (check-value-with-key content "login" key *login*)
-	       (check-value-with-key content "password" key *password*))
-	  (equal (find-in-content "identified" content) "identified")))))
+    (let* ((key (find-in-content "key" content))
+	   (ret (and key
+		     (member key *authorized-keys* :test #'string=)
+		     (or (and (check-value-with-key content "login" key *login*)
+			      (check-value-with-key content "password" key *password*))
+			 (check-value-with-key content "identified" key *logged-key*)))))
+      (setf *authorized-keys* (remove key *authorized-keys* :test #'string=))
+      ret)))
 
 
 (defmacro with-check-identified ((content sock host only-head) &body body)
@@ -84,8 +91,11 @@
 
 (defun send-login-page (sock host &optional (only-head nil))
   (declare (ignore host))
-  (send-http sock "text/html"
-	     (format nil "<html>
+  (let ((auth-key (generate-key)))
+    (push auth-key *authorized-keys*)
+    (print *authorized-keys*)
+    (send-http sock "text/html"
+	       (format nil "<html>
 <head>
   <!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"
      \"http://www.w3.org/TR/html4/transitional.dtd\">
@@ -113,25 +123,39 @@
     </center>  </form>
 </body>
 </html>"
-		     (generate-key))
-	     only-head))
+		       auth-key)
+	       only-head)))
 
 
 
 (let ((hit 0))
   (defun send-standard-page (sock host content &optional only-head message)
     (with-check-identified (content sock host only-head)
-      (send-http sock "text/html"
-		 (format nil "<html>
+      (let ((auth-key (generate-key)))
+	(pushnew auth-key *authorized-keys*)
+	(print *authorized-keys*)
+	(send-http sock "text/html"
+		   (format nil "<html>
 <head>
   <!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"
      \"http://www.w3.org/TR/html4/transitional.dtd\">
   <title>clwebctrl</title>
+  <script src=\"md5.js\" type=\"text/javascript\"></script>
+  <SCRIPT LANGUAGE='JavaScript'>
+  <!-- Begin
+  function crypt () {
+    document.form.identified.value = hex_md5 (~S + document.form.key.value);
+    return true;
+  }
+  //  End -->
+  </script>
 </head>
 <p align='right'><a href='/'>Log Out</a></p>
-<body onLoad=\"document.login_form.login.focus()\">
-  <form action=\"/\" method=\"post\" name=\"login_form\" enctype=\"application/x-www-form-urlencoded\">
-    <input type=\"hidden\" name=\"identified\" value=\"identified\">
+<body>
+  <form action=\"/\" method=\"post\" name=\"form\" enctype=\"application/x-www-form-urlencoded\"
+        onsubmit=\"return crypt();\">
+    <input type=\"hidden\" name=\"key\" value=~S>
+    <input type=\"hidden\" name=\"identified\" value=\"pouf\">
     <p>~A</p>
     ~A
     <hr>
@@ -142,11 +166,13 @@
   </form>
 </body>
 </html>"
-			 (if message message "")
-			 *module-string*
-			 (if *in-production* "" "Test code")
-			 (incf hit))
-		 only-head))))
+			   *logged-key*
+			   auth-key
+			   (if message message "")
+			   *module-string*
+			   (if *in-production* "" "Test code")
+			   (incf hit))
+		   only-head)))))
 
 
 (defun send-main-page (sock host content &optional only-head)
@@ -240,6 +266,7 @@
 
 
 (defun start-server (&optional (port *port*))
+  (setf *logged-key* (generate-key))
   (when (probe-file *config-file*)
     (load *config-file*))
   (let ((server-sock (net:open-socket-server port)))
