@@ -24,10 +24,11 @@
 (defpackage TOOLS
   (:use COMMON-LISP)
   (:export "CLDEBUG"
-	   :fformat
-	   :split-string
-	   :split-list
-	   :aif :it
+	   #:fformat
+	   #:split-string
+	   #:split-list
+	   #:aif #:it
+	   #:generate-key
 	   "GET-COMMAND-LINE-WORDS"
 	   "STRING-TO-LIST"
 	   "NEAR-POSITION"
@@ -95,6 +96,21 @@
      (if it ,if ,else)))
 
 
+(let* ((dic (with-output-to-string (str)
+	      (dotimes (i 26)
+		(princ (code-char (+ i (char-code #\a))) str)
+		(princ (code-char (+ i (char-code #\A))) str))
+	      (dotimes (i 10)
+		(princ (code-char (+ i (char-code #\0))) str))))
+       (dic-size (length dic)))
+  (defun generate-key (&optional (min-size 10) (max-size 30))
+    (let ((length (+ (random (- max-size min-size)) min-size)))
+      (with-output-to-string (str)
+	(dotimes (i length)
+	  (princ (aref dic (random dic-size)) str))))))
+
+
+
 
 (defun get-command-line-words ()
   #+CLISP ext:*args*
@@ -129,6 +145,8 @@
 		   pos)
 	       ret)))
       ((null char) ret)))
+
+
 
 
 ;;;(defun near-position2 (chars str &key (start 0))

@@ -14,16 +14,17 @@
 			((:file "tools")
 			 (:file "shell")
 			 (:file "net")
+			 (:file "md5")
 			 (:file "transfer-stream"
 				:depends-on ("tools" "net"))
 			 (:file "my-http"
 				:depends-on ("tools" "net" "transfer-stream"))
 			 (:file "package"
-				:depends-on ("tools" "net" "my-http" "transfer-stream" "shell"))
+				:depends-on ("tools" "net" "my-http" "transfer-stream" "shell" "md5"))
 			 (:file "module"
 				:depends-on ("tools" "net" "my-http" "transfer-stream" "shell" "package"))
 			 (:file "clwebctrl"
-				:depends-on ("tools" "net" "my-http" "transfer-stream" "shell" "package" "module"))))))
+				:depends-on ("tools" "net" "my-http" "transfer-stream" "shell" "package" "module" "md5"))))))
 
 
 

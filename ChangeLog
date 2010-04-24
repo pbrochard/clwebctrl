@@ -1,0 +1,6 @@
+2010-04-24  Philippe Brochard  <pbrochard@common-lisp.net>
+
+	* clwebctrl.lisp (check-if-identified): Add a MD5 hash challenge
+	in password check.
+
+

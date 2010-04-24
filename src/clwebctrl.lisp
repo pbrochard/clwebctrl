@@ -44,9 +44,16 @@
 
 
 (defun check-if-identified (content)
-  (or (and (equal (find-in-content "a1234" content) *login*)
-	   (equal (find-in-content "b1234" content) *password*))
-      (equal (find-in-content "identified" content) "identified")))
+  (labels ((check-value-with-key (content field key original)
+	     (let ((to-check (find-in-content field content)))
+	       (when to-check
+		 (string= to-check (md5 (concatenate 'string original key)))))))
+    (let ((key (find-in-content "key" content)))
+      (or (and key
+	       (check-value-with-key content "login" key *login*)
+	       (check-value-with-key content "password" key *password*))
+	  (equal (find-in-content "identified" content) "identified")))))
+
 
 (defmacro with-check-identified ((content sock host only-head) &body body)
   `(if (check-if-identified ,content)
@@ -74,6 +81,7 @@
 	     only-head))
 
 
+
 (defun send-login-page (sock host &optional (only-head nil))
   (declare (ignore host))
   (send-http sock "text/html"
@@ -82,18 +90,32 @@
   <!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"
      \"http://www.w3.org/TR/html4/transitional.dtd\">
   <title>clwebctrl:login</title>
+  <script src=\"md5.js\" type=\"text/javascript\"></script>
+  <SCRIPT LANGUAGE='JavaScript'>
+  <!-- Begin
+  function crypt () {
+    document.login_form.login.value = hex_md5 (document.login_form.login.value + document.login_form.key.value);
+    document.login_form.password.value = hex_md5 (document.login_form.password.value + document.login_form.key.value);
+    return true;
+  }
+  //  End -->
+  </script>
 </head>
 <body onLoad=\"document.login_form.login.focus()\">
-  <form action=\"/\" method=\"post\" name=\"login_form\" enctype=\"application/x-www-form-urlencoded\">
+  <form action=\"/\" method=\"post\" name=\"login_form\" enctype=\"application/x-www-form-urlencoded\"
+        onsubmit=\"return crypt();\">
     <br><br>
     <center>
-      <p> Utilisateur : <input type=\"login\" name=\"a1234\" id=\"login\"> </p>
-      <p> Mot de passe : <input type=\"password\" name=\"b1234\"> </p>
+      <input type=\"hidden\" name=\"key\" value=~S>
+      <p> Utilisateur : <input type=\"login\" name=\"login\" id=\"login\"> </p>
+      <p> Mot de passe : <input type=\"password\" name=\"password\"> </p>
       <p> <input type=\"submit\" value=\"Envoyer\"> </p>
     </center>  </form>
 </body>
-</html>")
+</html>"
+		     (generate-key))
 	     only-head))
+
 
 
 (let ((hit 0))
@@ -140,6 +162,9 @@
   (declare (ignore host))
   (send-file-http sock "logo.png" :only-head only-head))
 
+(defun send-md5.js (sock host &optional only-head)
+  (declare (ignore host))
+  (send-file-http sock "src/md5.js" :only-head only-head))
 
 
 (defun fn-end-multipart (sock host)
@@ -166,6 +191,7 @@
     (case type-request
       ((or :get :head) (cond ((string-equal url "/") (send-login-page sock host (only-head-p type-request)))
 			     ((string-equal "/logo.png" url) (send-logo sock host (only-head-p type-request)))
+			     ((string-equal "/md5.js" url) (send-md5.js sock host (only-head-p type-request)))
 			     (t (fformat t "Unknown address on GET~%")
 				(send-basic-page sock host
 						 "Unknown page"

@@ -22,7 +22,7 @@
   (:use :common-lisp
 	#+(or CLISP CMU) :ext
 	#+SBCL :sb-ext
-	:tools :my-http
+	:tools :my-http :md5
 	:transfer-stream
 	:shell)
   (:export :start-server))
