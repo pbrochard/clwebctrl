@@ -115,7 +115,7 @@ E.g., (compose abs (dl-val zz) 'key) ==>
 
 
 (defun client-address (sock)
-  (nth-value 2 (socket-host/port sock)))
+  (socket-host/port sock))
 
 
 ;;;
