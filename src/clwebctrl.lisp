@@ -31,10 +31,6 @@
 (in-package :clwebctrl)
 
 
-(defparameter *logged-key* nil)
-(defparameter *authorized-keys* nil)
-
-
 (defun only-head-p (type-request)
   (if (equal type-request :head) :head nil))
 
@@ -47,23 +43,27 @@
   (zerop (or (search search (string-trim " " content)) -1)))
 
 
-(defun check-if-identified (content)
+(defun check-if-identified (sock content)
   (labels ((check-value-with-key (content field key original)
 	     (let ((to-check (find-in-content field content)))
 	       (when to-check
 		 (string= to-check (md5 (concatenate 'string original key)))))))
     (let* ((key (find-in-content "key" content))
+	   (client-address (net:client-address sock))
 	   (ret (and key
-		     (member key *authorized-keys* :test #'string=)
+		     (member key *authorized-keys* :test #'(lambda (x y)
+							     (and (string= x (first y))
+								  (string= client-address (second y)))))
 		     (or (and (check-value-with-key content "login" key *login*)
 			      (check-value-with-key content "password" key *password*))
 			 (check-value-with-key content "identified" key *logged-key*)))))
-      (setf *authorized-keys* (remove key *authorized-keys* :test #'string=))
+      (setf *authorized-keys* (remove key *authorized-keys* :test #'(lambda (x y)
+								      (string= x (first y)))))
       ret)))
 
 
 (defmacro with-check-identified ((content sock host only-head) &body body)
-  `(if (check-if-identified ,content)
+  `(if (check-if-identified ,sock ,content)
        ,@body
        (send-login-page ,sock ,host ,only-head)))
 
@@ -92,7 +92,7 @@
 (defun send-login-page (sock host &optional (only-head nil))
   (declare (ignore host))
   (let ((auth-key (generate-key)))
-    (push auth-key *authorized-keys*)
+    (push (list auth-key (net:client-address sock)) *authorized-keys*)
     (print *authorized-keys*)
     (send-http sock "text/html"
 	       (format nil "<html>
@@ -132,7 +132,7 @@
   (defun send-standard-page (sock host content &optional only-head message)
     (with-check-identified (content sock host only-head)
       (let ((auth-key (generate-key)))
-	(pushnew auth-key *authorized-keys*)
+	(pushnew (list auth-key (net:client-address sock)) *authorized-keys*)
 	(print *authorized-keys*)
 	(send-http sock "text/html"
 		   (format nil "<html>

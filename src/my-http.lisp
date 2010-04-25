@@ -255,13 +255,12 @@ When filename is not null then write content to file 'filename'"
 	(|CONTENT-LENGTH:| (setq length (parse-integer (second head))))
 	(|CONTENT-TYPE:| (setq type (second head)))))
     (when (eq (first ret) 'post)
-      (if (string= type "multipart/form-data;")
-	  (progn
-	    (setq ret (parse-a-post-url-multipart sock length tempfile savedir
-						  fn-end-multipart
-						  fn-end-extract-content
-						  (first host))))
-	  (setq ret (parse-a-post-url sock length)))
+      (setq ret (if (string= type "multipart/form-data;")
+		    (parse-a-post-url-multipart sock length tempfile savedir
+						fn-end-multipart
+						fn-end-extract-content
+						(first host))
+		    (parse-a-post-url sock length)))
       (push directory ret)
       (push :POST ret))
     (unless ret

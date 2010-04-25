@@ -36,7 +36,7 @@
 
 
 (export
- '(resolve-host-ipaddr ipaddr-to-dotted dotted-to-ipaddr ipaddr-closure
+ '(client-address resolve-host-ipaddr ipaddr-to-dotted dotted-to-ipaddr ipaddr-closure
    hostent hostent-name hostent-aliases hostent-addr-list hostent-addr-type
    socket open-socket socket-host/port socket-string socket-server
    set-socket-stream-format
@@ -112,6 +112,10 @@ E.g., (compose abs (dl-val zz) 'key) ==>
                    rr))))
     (with-gensyms ("COMPOSE-" arg)
       `(lambda (,arg) ,(rec functions arg)))))
+
+
+(defun client-address (sock)
+  (nth-value 2 (socket-host/port sock)))
 
 
 ;;;

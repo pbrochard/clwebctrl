@@ -38,6 +38,8 @@
 
 (defparameter *config-file* (merge-pathnames (user-homedir-pathname) ".clwebctrlrc"))
 
+(defparameter *logged-key* nil)
+(defparameter *authorized-keys* nil)
 
 (defparameter *module-list* nil)
 (defparameter *module-string* "")

@@ -36,19 +36,19 @@
   (add-in-module-string "</p>"))
 
 
+(defun use-all-modules ()
+  (dolist (module *module-list*)
+    (use-module (module-name module))))
 
 
-(defun send-webcam (sock host content &optional only-head)
-  (declare (ignore host content))
-  (sh "camE -f -s")
-  (send-file-http sock "/tmp/webcam.jpg" :only-head only-head))
 
 
-(defun send-ssh-enable (sock host content &optional only-head)
-  (send-standard-page sock host content only-head "SSH enabled"))
 
-(defun send-ssh-disable (sock host content &optional only-head)
-  (send-standard-page sock host content only-head "SSH disabled"))
+
+
+
+(defmodule 'refresh
+    "<input type='submit' name='refresh' value='refresh'>")
 
 
 (defun send-halt-server-confirm (sock host content &optional only-head)
@@ -60,14 +60,19 @@
   (when *in-production*
     (sh "sudo halt")))
 
-
-(defmodule 'refresh
-    "<input type='submit' name='refresh' value='refresh'>")
-
 (defmodule 'shutdown-server
     "<input type='submit' name='halt_server' value='Shutdown Server'>"
   '("halt_server" send-halt-server-confirm)
   '("halt_server_confirm" send-halt-server))
+
+
+
+(defun send-ssh-enable (sock host content &optional only-head)
+  (send-standard-page sock host content only-head "SSH enabled"))
+
+(defun send-ssh-disable (sock host content &optional only-head)
+  (send-standard-page sock host content only-head "SSH disabled"))
+
 
 (defmodule 'manage-ssh
     "<input type='submit' name='ssh_enable' value='Enable SSH'>
@@ -76,6 +81,32 @@
   '("ssh_disable" send-ssh-disable))
 
 
+
+(defun send-webcam (sock host content &optional only-head)
+  (declare (ignore host content))
+  (sh "camE -f -s")
+  (send-file-http sock "/tmp/webcam.jpg" :only-head only-head))
+
 (defmodule 'webcam
     "<input type='submit' name='webcam' value='webcam'>"
   '("webcam" send-webcam))
+
+
+
+
+(defun send-auth-info (sock host content &optional only-head)
+  (send-standard-page sock host content only-head
+		      (format nil "<p>Authentication informations :</p>
+<p>~S</p>
+<p align='right'><input type='submit' name='auth_info_clear' value='CLear Authentication Info'></p>"
+			      *authorized-keys*)))
+
+(defun clear-auth-info (sock host content &optional only-head)
+  (setf *authorized-keys* nil)
+  (send-auth-info sock host content only-head))
+
+
+(defmodule 'auth-info
+    "<input type='submit' name='auth_info' value='Authentication Info'>"
+  '("auth_info" send-auth-info)
+  '("auth_info_clear" clear-auth-info))

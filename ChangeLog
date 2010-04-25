@@ -2,6 +2,7 @@
 
 	* src/clwebctrl.lisp (check-if-identified): Add a MD5 hash challenge
 	in main page.
+	(check-if-identified): Add an client address check.
 
 2010-04-24  Philippe Brochard  <pbrochard@common-lisp.net>
 
