@@ -43,6 +43,17 @@
   (zerop (or (search search (string-trim " " content)) -1)))
 
 
+
+(defun remove-key (url)
+  (print *authorized-keys*)
+  (let ((key (second (split-string url #\=))))
+    (fformat t "~&****** Remove key: ~A~%" key)
+    (setf *authorized-keys* (remove-if #'(lambda (x)
+					   (string= (md5 (first x)) key))
+				       *authorized-keys*)))
+  (print *authorized-keys*))
+
+
 (defun check-if-identified (sock content)
   (labels ((check-value-with-key (content field key original)
 	     (let ((to-check (find-in-content field content)))
@@ -150,7 +161,7 @@
   //  End -->
   </script>
 </head>
-<p align='right'><a href='/'>Log Out</a></p>
+<p align='right'><a href='/&remove_key=~A'>Log Out</a></p>
 <body>
   <form action=\"/\" method=\"post\" name=\"form\" enctype=\"application/x-www-form-urlencoded\"
         onsubmit=\"return crypt();\">
@@ -167,6 +178,7 @@
 </body>
 </html>"
 			   *logged-key*
+			   (md5 auth-key)
 			   auth-key
 			   (if message message "")
 			   *module-string*
@@ -215,14 +227,12 @@
 	(url (third headers))
 	(content (fourth headers)))
     (case type-request
-      ((or :get :head) (cond ((string-equal url "/") (send-login-page sock host (only-head-p type-request)))
-			     ((string-equal "/logo.png" url) (send-logo sock host (only-head-p type-request)))
+      ((or :get :head) (cond ((string-equal "/logo.png" url) (send-logo sock host (only-head-p type-request)))
 			     ((string-equal "/md5.js" url) (send-md5.js sock host (only-head-p type-request)))
-			     (t (fformat t "Unknown address on GET~%")
-				(send-basic-page sock host
-						 "Unknown page"
-						 "Sorry, this page is not on server.<br>" "" ""
-						 (only-head-p type-request)))))
+			     ((search "/&remove_key=" url)
+			      (remove-key url)
+			      (send-login-page sock host (only-head-p type-request)))
+			     (t (send-login-page sock host (only-head-p type-request)))))
       (:post (cond ((string-equal url "/") (send-main-page sock host content (only-head-p type-request)))
 		   (t (fformat t "Unknown address on POST~%")
 		      (send-basic-page sock host
