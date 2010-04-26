@@ -107,6 +107,35 @@
 
 
 (defmodule 'auth-info
-    "<input type='submit' name='auth_info' value='Authentication Info'>"
+    "<input type='submit' name='auth_info' value='Authentication Informations'>"
   '("auth_info" send-auth-info)
   '("auth_info_clear" clear-auth-info))
+
+
+
+(defun collect-info (cmd)
+  (let ((tmpfile "/tmp/clwebctrl.tmp"))
+    (sh (format nil "~A > ~A" cmd tmpfile))
+    (format nil "<b>$ ~A</b><br>~%~A<br>" cmd
+	    (with-output-to-string (str)
+	      (with-open-file (stream tmpfile :direction :input)
+		(loop for line = (read-line stream nil nil)
+		   while line
+		   do (format str "~A<br>~%" line)))))))
+
+
+(defparameter *command-info-list* '("free -m" "df -h" "top -n 1"))
+
+
+(defun send-system-info (sock host content &optional only-head)
+  (send-standard-page sock host content only-head
+		      (format nil "<h1>System informations :</h1>~%~A~%"
+			      (with-output-to-string (str)
+				(dolist (cmd *command-info-list*)
+				  (format str (collect-info cmd)))))))
+
+
+
+(defmodule 'sys-info
+    "<input type='submit' name='sys_info' value='System Informations'>"
+  '("sys_info" send-system-info))
