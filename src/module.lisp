@@ -124,7 +124,7 @@
 		   do (format str "~A<br>~%" line)))))))
 
 
-(defparameter *command-info-list* '("free -m" "df -h" "top -n 1"))
+(defparameter *command-info-list* '("free -m" "df -h" "top -b -n 1"))
 
 
 (defun send-system-info (sock host content &optional only-head)
